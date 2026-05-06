@@ -110,12 +110,13 @@ function timeToMinutes(time){
     return h * 60 + m;
 }
 
-function formatEndTime(start, duration){
-    if (!start || !duration) return 'N/A';
-    const total = timeToMinutes(start) + duration;
-    const nh = Math.floor(total / 60);
-    const nm = total % 60;
-    return `${nh.toString().padStart(2,'0')}:${nm.toString().padStart(2,'0')}`;
+// ✅ FIXED THIS FUNCTION - now returns proper HH:MM format
+function formatEndTime(startTime, durationMinutes){
+    if (!startTime || !durationMinutes) return 'N/A';
+    const totalMinutes = timeToMinutes(startTime) + parseInt(durationMinutes);
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = totalMinutes % 60;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
 }
 
 function formatDateDisplay(dateStr){
@@ -136,10 +137,10 @@ function renderSection(roomName, elementId){
     
     listEl.innerHTML = '';
     roomBookings.forEach((b, index) => {
-        // Ensure all values exist before displaying
-        const date = formatDateDisplay(b.date) || 'N/A';
+        // ✅ Now correctly formatted end time
+        const date = formatDateDisplay(b.date);
         const startTime = b.start || 'N/A';
-        const endTime = formatEndTime(b.start, b.duration) || 'N/A';
+        const endTime = formatEndTime(b.start, b.duration);
         const fullName = `${b.fname || 'Unknown'} ${b.lname || 'User'}`.trim();
         
         const el = document.createElement('div');
@@ -168,7 +169,7 @@ async function fetchBookings(){
         
         const data = await res.json();
         bookings = data.map(b => ({
-            id: b._id || b.id, // Capture the unique ID properly
+            id: b._id || b.id,
             room: b.Room || '',
             date: b.Date || '',
             start: b.Start || '',
@@ -220,7 +221,6 @@ function hasTimeConflict(newBooking, existingBookings) {
     const newEnd = newStart + newBooking.duration;
 
     return existingBookings.some(booking => {
-        // Only check bookings for the same room and date
         if (booking.room !== newBooking.room || booking.date !== newBooking.date) {
             return false;
         }
@@ -228,16 +228,12 @@ function hasTimeConflict(newBooking, existingBookings) {
         const existingStart = timeToMinutes(booking.start);
         const existingEnd = existingStart + booking.duration;
 
-        // Check if times overlap - this is the key fix
-        // Overlap occurs if:
-        // New start is before existing end AND new end is after existing start
         return newStart < existingEnd && newEnd > existingStart;
     });
 }
 
 // --- BOOK ROOM ---
 async function bookRoom(){
-    // Room selection
     const sel1 = document.getElementById('roomBunk1').value;
     const sel2 = document.getElementById('roomBunk2').value;
     const selP = document.getElementById('roomPiano').value;
@@ -259,7 +255,6 @@ async function bookRoom(){
     const fname = document.getElementById('fname').value.trim();
     const lname = document.getElementById('lname').value.trim();
 
-    // Validate all fields
     if(!room || !date || !fname || !lname){
         alert('⚠️ Please fill in ALL fields!');
         return;
@@ -275,10 +270,7 @@ async function bookRoom(){
         return;
     }
 
-    // Create new booking object
     const newBooking = { room, date, start, duration, fname, lname };
-
-    // Improved conflict check
     const conflict = hasTimeConflict(newBooking, bookings);
 
     if(conflict){
@@ -286,7 +278,6 @@ async function bookRoom(){
         return;
     }
 
-    // Prepare data for SheetDB (uses exact column names from your sheet)
     const sheetData = {
         Room: room,
         Date: date,
@@ -336,7 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
         sel.addEventListener('change', () => singleSelect(id));
     });
     
-    // Set default date to today
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('date').value = today;
     
