@@ -9,9 +9,11 @@
 <body class="bg-gray-100 font-sans">
 <div class="max-w-4xl mx-auto p-4">
 
+  <!-- Booking Form -->
   <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
     <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Woolwich Practice Space Booking System</h1>
     <p class="text-center text-gray-500 mb-3">Available times: 07:00 - 22:00 | Durations: 30, 60 or 90 mins</p>
+
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="border rounded-lg p-4 bg-blue-50">
         <h2 class="font-bold text-lg text-blue-700 mb-2">Practice Bunk 1</h2>
@@ -56,6 +58,7 @@
     <button onclick="bookRoom()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">BOOK NOW</button>
   </div>
 
+  <!-- Current Bookings -->
   <div class="bg-white rounded-xl shadow-lg p-6">
     <h3 class="text-xl font-bold mb-4">Current Bookings</h3>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -73,13 +76,15 @@
       </div>
     </div>
   </div>
+
 </div>
 
 <script>
-const SHEET_API = "https://sheetdb.io/api/v1/9uo8rb9rrusr9"; // replace with your SheetDB API
+// --- SETTINGS ---
+const SHEET_API = "https://sheetdb.io/api/v1/YOUR_API_KEY"; // <-- Replace with your SheetDB API
 const DELETE_PASSWORD = "Woolwich2023";
 
-// Time slots
+// --- TIME SLOTS ---
 const times = [];
 for(let h=7; h<=21; h++){
   for(let m=0; m<60; m+=30){
@@ -87,47 +92,50 @@ for(let h=7; h<=21; h++){
   }
 }
 
+// --- GLOBAL BOOKINGS ---
 let bookings = [];
 
-// Single room selection
+// --- UTILITY FUNCTIONS ---
 function singleSelect(selectedId){
   ['Bunk1','Bunk2','Piano'].forEach(id=>{
     if(id!==selectedId) document.getElementById('room'+id).value='available';
   });
 }
 
-// Format date display
-function formatDateDisplay(dateStr){
-  const [y,m,d] = dateStr.split('-');
-  return `${d}-${m}-${y}`;
+function timeToMinutes(time){
+  const [h,m]=time.split(':').map(Number);
+  return h*60 + m;
 }
 
-// Format end time
-function formatTime(start, duration){
-  const [h,m] = start.split(':').map(Number);
-  let total = h*60 + m + duration;
-  const nh = Math.floor(total/60);
+function formatEndTime(start, duration){
+  const total = timeToMinutes(start) + duration;
+  const nh = Math.floor(total / 60);
   const nm = total % 60;
   return `${nh.toString().padStart(2,'0')}:${nm.toString().padStart(2,'0')}`;
 }
 
-// Render bookings with Delete button
+function formatDateDisplay(dateStr){
+  const [y,m,d]=dateStr.split('-');
+  return `${d}-${m}-${y}`;
+}
+
+// --- RENDER BOOKINGS ---
 function renderSection(roomName, elementId){
   const listEl = document.getElementById(elementId);
-  const roomBookings = bookings.filter(b=>b.room===roomName);
+  const roomBookings = bookings.filter(b => b.room === roomName);
   if(roomBookings.length===0){
     listEl.innerHTML='<p class="text-gray-500 italic">No bookings</p>';
     return;
   }
   listEl.innerHTML='';
-  roomBookings.forEach(b=>{
+  roomBookings.forEach((b, index) => {
     const el = document.createElement('div');
     el.className='bg-white p-2 rounded border';
     el.innerHTML=`
       <div class="font-semibold">${formatDateDisplay(b.date)}</div>
-      <div>${b.start} - ${formatTime(b.start,b.duration)}</div>
+      <div>${b.start} - ${formatEndTime(b.start,b.duration)}</div>
       <div class="text-gray-600 text-xs">${b.fname} ${b.lname}</div>
-      <button onclick="deleteBooking('${b.id}')" class="text-red-500 hover:text-red-700 text-xs mt-1">✕ Delete</button>
+      <button onclick="requestDelete(${index})" class="text-red-500 hover:text-red-700 text-xs mt-1">✕ Delete</button>
     `;
     listEl.appendChild(el);
   });
@@ -139,12 +147,11 @@ function updateList(){
   renderSection("Piano Only","listPiano");
 }
 
-// Fetch bookings from SheetDB
+// --- FETCH BOOKINGS FROM SHEETDB ---
 async function fetchBookings(){
   const res = await fetch(SHEET_API);
   const data = await res.json();
   bookings = data.map(b=>({
-    id: b.id,
     room: b.Room,
     date: b.Date,
     start: b.Start,
@@ -155,20 +162,25 @@ async function fetchBookings(){
   updateList();
 }
 
-// Delete booking
-async function deleteBooking(id){
-  const password = prompt("🔒 Enter password to delete this booking:");
-  if(password !== DELETE_PASSWORD) return alert("❌ Incorrect password!");
+// --- DELETE BOOKING ---
+async function requestDelete(index){
+  const password = prompt("Enter password to delete this booking:");
+  if(password !== DELETE_PASSWORD){
+    alert("❌ Incorrect password");
+    return;
+  }
+  const booking = bookings[index];
+  const rowId = booking.id || booking._id; // SheetDB ID (ensure your SheetDB has unique IDs)
+  if(!rowId){alert("❌ Cannot delete: ID missing"); return;}
 
-  const res = await fetch(`${SHEET_API}/${id}`, { method: 'DELETE' });
-  if(res.ok){
-    alert("✅ Booking deleted!");
-    fetchBookings();
-  } else alert("❌ Error deleting booking!");
+  const res = await fetch(`${SHEET_API}/${rowId}`, {method:'DELETE'});
+  if(res.ok){ alert("✅ Booking deleted"); fetchBookings(); }
+  else alert("❌ Error deleting booking");
 }
 
-// Book a room
+// --- BOOK ROOM ---
 async function bookRoom(){
+  // Room selection
   const sel1=document.getElementById('roomBunk1').value;
   const sel2=document.getElementById('roomBunk2').value;
   const selP=document.getElementById('roomPiano').value;
@@ -187,13 +199,19 @@ async function bookRoom(){
     return;
   }
 
-  const conflict = bookings.some(b=>b.room===room && b.date===date && !(
-    parseInt(b.start.split(':')[0])*60+parseInt(b.start.split(':')[1])+b.duration <= parseInt(start.split(':')[0])*60+parseInt(start.split(':')[1]) ||
-    parseInt(start.split(':')[0])*60+parseInt(start.split(':')[1])+duration <= parseInt(b.start.split(':')[0])*60+parseInt(b.start.split(':')[1])
-  ));
+  // Conflict check
+  const conflict = bookings.some(b => {
+    if(b.room !== room || b.date !== date) return false;
+    const existingStart = timeToMinutes(b.start);
+    const existingEnd = existingStart + b.duration;
+    const newStart = timeToMinutes(start);
+    const newEnd = newStart + duration;
+    return !(newEnd <= existingStart || newStart >= existingEnd);
+  });
+
   if(conflict){alert('❌ This time slot is already booked!'); return;}
 
-  const newBooking = {
+  const newBooking={
     Room: room,
     Date: date,
     Start: start,
@@ -207,6 +225,7 @@ async function bookRoom(){
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({data:newBooking})
   });
+
   if(res.ok){
     alert('✅ Booking added!');
     fetchBookings();
@@ -220,7 +239,7 @@ async function bookRoom(){
   document.getElementById('lname').value='';
 }
 
-// Init
+// --- INIT ---
 document.addEventListener('DOMContentLoaded',()=>{
   ['Bunk1','Bunk2','Piano'].forEach(id=>{
     const sel=document.getElementById('room'+id);
