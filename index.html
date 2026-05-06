@@ -12,26 +12,45 @@
 
 <!-- BOOKING FORM -->
 <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-<h1 class="text-3xl font-bold text-center mb-4">Practice Room Booking</h1>
+<h1 class="text-3xl font-bold text-center mb-4">Woolwich Practice Room Booking</h1>
 
-<div class="grid grid-cols-3 gap-4 mb-4">
-<button onclick="selectRoom('Practice Bunk 1')" id="btn1" class="roomBtn bg-blue-200 p-3 rounded">Practice Bunk 1</button>
-<button onclick="selectRoom('Practice Bunk 2')" id="btn2" class="roomBtn bg-green-200 p-3 rounded">Practice Bunk 2</button>
-<button onclick="selectRoom('Piano Only')" id="btn3" class="roomBtn bg-purple-200 p-3 rounded">Piano Only</button>
+<!-- ROOM SELECT -->
+<h3 class="font-semibold mb-2">Select Room</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+<label class="border rounded-lg p-4 bg-blue-50 cursor-pointer">
+<input type="radio" name="room" value="Practice Bunk 1" class="mr-2">
+Practice Bunk 1
+</label>
+
+<label class="border rounded-lg p-4 bg-green-50 cursor-pointer">
+<input type="radio" name="room" value="Practice Bunk 2" class="mr-2">
+Practice Bunk 2
+</label>
+
+<label class="border rounded-lg p-4 bg-purple-50 cursor-pointer">
+<input type="radio" name="room" value="Piano Only" class="mr-2">
+Piano Only
+</label>
+
 </div>
 
+<!-- DATE + TIME -->
 <div class="grid grid-cols-3 gap-4 mb-4">
 <input type="date" id="date" class="p-2 border rounded">
 <select id="startTime" class="p-2 border rounded"></select>
 <select id="endTime" class="p-2 border rounded"></select>
 </div>
 
+<!-- NAME -->
 <div class="grid grid-cols-2 gap-4 mb-4">
 <input type="text" id="fname" placeholder="First name" class="p-2 border rounded">
 <input type="text" id="lname" placeholder="Last name" class="p-2 border rounded">
 </div>
 
-<button onclick="bookRoom()" class="w-full bg-blue-600 text-white p-3 rounded">BOOK NOW</button>
+<button onclick="bookRoom()" class="w-full bg-blue-600 text-white p-3 rounded">
+BOOK NOW
+</button>
 </div>
 
 <!-- CURRENT BOOKINGS -->
@@ -43,13 +62,13 @@
 </div>
 
 <script>
-// 🔴 PASTE YOUR SHEETDB URL HERE
+// ⭐⭐ PASTE YOUR SHEETDB URL HERE ⭐⭐
 const SHEET_API = "PASTE_YOUR_SHEETDB_URL_HERE";
 
-let selectedRoom = null;
 let bookings = [];
 
-// ⏰ Generate time slots
+
+// Generate time slots 07:00–22:00
 const times = [];
 for (let h = 7; h <= 22; h++) {
   for (let m = 0; m < 60; m += 30) {
@@ -57,7 +76,7 @@ for (let h = 7; h <= 22; h++) {
   }
 }
 
-// Fill time dropdowns
+// Fill dropdowns
 const startSel = document.getElementById("startTime");
 const endSel = document.getElementById("endTime");
 times.forEach(t=>{
@@ -65,7 +84,7 @@ times.forEach(t=>{
   endSel.innerHTML += `<option value="${t}">${t}</option>`;
 });
 
-// Prevent end before start
+// Prevent end time before start
 startSel.onchange = () => {
   const startIndex = times.indexOf(startSel.value);
   Array.from(endSel.options).forEach((opt,i)=>{
@@ -73,14 +92,6 @@ startSel.onchange = () => {
   });
 };
 
-// Room selection
-function selectRoom(room){
-  selectedRoom = room;
-  document.querySelectorAll('.roomBtn').forEach(b=>b.classList.remove("ring","ring-4"));
-  event.target.classList.add("ring","ring-4");
-}
-
-// Convert time to minutes
 function mins(t){
   const [h,m] = t.split(":");
   return (+h*60)+(+m);
@@ -98,8 +109,11 @@ function overlaps(newB){
 // BOOK ROOM
 async function bookRoom(){
 
+  const roomRadio = document.querySelector('input[name="room"]:checked');
+  if(!roomRadio){ alert("Select a room"); return; }
+
   const payload = {
-    Room: selectedRoom,
+    Room: roomRadio.value,
     Date: date.value,
     StartTime: startTime.value,
     EndTime: endTime.value,
@@ -107,12 +121,12 @@ async function bookRoom(){
     LastName: lname.value
   };
 
-  if(Object.values(payload).includes(null) || Object.values(payload).includes("")){
-    alert("Fill all fields"); return;
+  if(Object.values(payload).includes("")){
+    alert("Fill in all fields"); return;
   }
 
   if(overlaps(payload)){
-    alert("Time already booked"); return;
+    alert("This time is already booked"); return;
   }
 
   // Save to Google Sheet
@@ -122,12 +136,14 @@ async function bookRoom(){
     body:JSON.stringify({data:payload})
   });
 
-  // Add locally so it appears instantly
+  // Show instantly
   bookings.push(payload);
   renderBookings();
+
+  alert("Booking saved!");
 }
 
-// LOAD BOOKINGS FROM SHEET
+// LOAD BOOKINGS FROM GOOGLE SHEET
 async function loadBookings(){
   const res = await fetch(SHEET_API);
   bookings = await res.json();
@@ -141,7 +157,7 @@ function renderBookings(){
 
   bookings.forEach(b=>{
     div.innerHTML += `
-      <div class="border p-2 mb-2 rounded">
+      <div class="border p-3 mb-2 rounded">
         <strong>${b.Room}</strong> — ${b.Date}<br>
         ${b.StartTime} → ${b.EndTime}<br>
         ${b.FirstName} ${b.LastName}
@@ -149,9 +165,10 @@ function renderBookings(){
   });
 }
 
-// INIT
+// Init
 document.getElementById("date").value = new Date().toISOString().split("T")[0];
 loadBookings();
 </script>
+
 </body>
 </html>
