@@ -1,95 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Practice Rooms Booking</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Practice Rooms Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 font-sans">
 <div class="max-w-4xl mx-auto p-4">
 
-  <!-- Booking Form -->
-  <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-    <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Woolwich Practice Space Booking System</h1>
-    <p class="text-center text-gray-500 mb-3">Available times: 07:00 - 22:00 | Durations: 30, 60 or 90 mins</p>
+    <!-- Booking Form -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Woolwich Practice Space Booking System</h1>
+        <p class="text-center text-gray-500 mb-3">Available times: 07:00 - 22:00 | Durations: 30, 60 or 90 mins</p>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div class="border rounded-lg p-4 bg-blue-50">
-        <h2 class="font-bold text-lg text-blue-700 mb-2">Practice Bunk 1</h2>
-        <select id="roomBunk1" class="w-full p-2 border rounded bg-white"></select>
-      </div>
-      <div class="border rounded-lg p-4 bg-green-50">
-        <h2 class="font-bold text-lg text-green-700 mb-2">Practice Bunk 2</h2>
-        <select id="roomBunk2" class="w-full p-2 border rounded bg-white"></select>
-      </div>
-      <div class="border rounded-lg p-4 bg-purple-50">
-        <h2 class="font-bold text-lg text-purple-700 mb-2">Piano Only</h2>
-        <select id="roomPiano" class="w-full p-2 border rounded bg-white"></select>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="border rounded-lg p-4 bg-blue-50">
+                <h2 class="font-bold text-lg text-blue-700 mb-2">Practice Bunk 1</h2>
+                <select id="roomBunk1" class="w-full p-2 border rounded bg-white"></select>
+            </div>
+            <div class="border rounded-lg p-4 bg-green-50">
+                <h2 class="font-bold text-lg text-green-700 mb-2">Practice Bunk 2</h2>
+                <select id="roomBunk2" class="w-full p-2 border rounded bg-white"></select>
+            </div>
+            <div class="border rounded-lg p-4 bg-purple-50">
+                <h2 class="font-bold text-lg text-purple-700 mb-2">Piano Only</h2>
+                <select id="roomPiano" class="w-full p-2 border rounded bg-white"></select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input type="date" id="date" class="w-full p-2 border rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+                <select id="duration" class="w-full p-2 border rounded">
+                    <option value="30">30 Minutes</option>
+                    <option value="60">60 Minutes</option>
+                    <option value="90">90 Minutes</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                <input type="text" id="fname" placeholder="Enter first name" class="w-full p-2 border rounded">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                <input type="text" id="lname" placeholder="Enter last name" class="w-full p-2 border rounded">
+            </div>
+        </div>
+
+        <button onclick="bookRoom()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">BOOK NOW</button>
     </div>
 
-    <div class="grid grid-cols-2 gap-4 mb-4">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
-        <input type="date" id="date" class="w-full p-2 border rounded">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Duration</label>
-        <select id="duration" class="w-full p-2 border rounded">
-          <option value="30">30 Minutes</option>
-          <option value="60">60 Minutes</option>
-          <option value="90">90 Minutes</option>
-        </select>
-      </div>
+    <!-- Current Bookings -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+        <h3 class="text-xl font-bold mb-4">Current Bookings</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="border border-blue-200 rounded-lg p-3 bg-blue-50">
+                <h4 class="font-bold text-blue-700 mb-2">Practice Bunk 1</h4>
+                <div id="listBunk1" class="space-y-2 text-sm"><p class="text-gray-500 italic">No bookings</p></div>
+            </div>
+            <div class="border border-green-200 rounded-lg p-3 bg-green-50">
+                <h4 class="font-bold text-green-700 mb-2">Practice Bunk 2</h4>
+                <div id="listBunk2" class="space-y-2 text-sm"><p class="text-gray-500 italic">No bookings</p></div>
+            </div>
+            <div class="border border-purple-200 rounded-lg p-3 bg-purple-50">
+                <h4 class="font-bold text-purple-700 mb-2">Piano Only</h4>
+                <div id="listPiano" class="space-y-2 text-sm"><p class="text-gray-500 italic">No bookings</p></div>
+            </div>
+        </div>
     </div>
-
-    <div class="grid grid-cols-2 gap-4 mb-6">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-        <input type="text" id="fname" placeholder="Enter first name" class="w-full p-2 border rounded">
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-        <input type="text" id="lname" placeholder="Enter last name" class="w-full p-2 border rounded">
-      </div>
-    </div>
-
-    <button onclick="bookRoom()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition mb-2">BOOK NOW</button>
-  </div>
-
-  <!-- Current Bookings -->
-  <div class="bg-white rounded-xl shadow-lg p-6">
-    <h3 class="text-xl font-bold mb-4">Current Bookings</h3>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="border border-blue-200 rounded-lg p-3 bg-blue-50">
-        <h4 class="font-bold text-blue-700 mb-2">Practice Bunk 1</h4>
-        <div id="listBunk1" class="space-y-2 text-sm"><p class="text-gray-500 italic">No bookings</p></div>
-      </div>
-      <div class="border border-green-200 rounded-lg p-3 bg-green-50">
-        <h4 class="font-bold text-green-700 mb-2">Practice Bunk 2</h4>
-        <div id="listBunk2" class="space-y-2 text-sm"><p class="text-gray-500 italic">No bookings</p></div>
-      </div>
-      <div class="border border-purple-200 rounded-lg p-3 bg-purple-50">
-        <h4 class="font-bold text-purple-700 mb-2">Piano Only</h4>
-        <div id="listPiano" class="space-y-2 text-sm"><p class="text-gray-500 italic">No bookings</p></div>
-      </div>
-    </div>
-  </div>
 
 </div>
 
 <script>
 // --- SETTINGS ---
-const SHEET_API = "https://sheetdb.io/api/v1/YOUR_API_KEY"; // <-- Replace with your SheetDB API
+const SHEET_API = "https://sheetdb.io/api/v1/YOUR_API_KEY"; // Replace with your SheetDB API key
 const DELETE_PASSWORD = "Woolwich2023";
 
 // --- TIME SLOTS ---
 const times = [];
 for(let h=7; h<=21; h++){
-  for(let m=0; m<60; m+=30){
-    times.push(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`);
-  }
+    for(let m=0; m<60; m+=30){
+        times.push(`${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`);
+    }
 }
 
 // --- GLOBAL BOOKINGS ---
@@ -97,163 +97,250 @@ let bookings = [];
 
 // --- UTILITY FUNCTIONS ---
 function singleSelect(selectedId){
-  ['Bunk1','Bunk2','Piano'].forEach(id=>{
-    if(id!==selectedId) document.getElementById('room'+id).value='available';
-  });
+    ['Bunk1','Bunk2','Piano'].forEach(id=>{
+        if(id !== selectedId) {
+            document.getElementById('room' + id).value = 'available';
+        }
+    });
 }
 
 function timeToMinutes(time){
-  const [h,m]=time.split(':').map(Number);
-  return h*60 + m;
+    if (!time) return 0;
+    const [h,m] = time.split(':').map(Number);
+    return h * 60 + m;
 }
 
 function formatEndTime(start, duration){
-  const total = timeToMinutes(start) + duration;
-  const nh = Math.floor(total / 60);
-  const nm = total % 60;
-  return `${nh.toString().padStart(2,'0')}:${nm.toString().padStart(2,'0')}`;
+    if (!start || !duration) return 'N/A';
+    const total = timeToMinutes(start) + duration;
+    const nh = Math.floor(total / 60);
+    const nm = total % 60;
+    return `${nh.toString().padStart(2,'0')}:${nm.toString().padStart(2,'0')}`;
 }
 
 function formatDateDisplay(dateStr){
-  const [y,m,d]=dateStr.split('-');
-  return `${d}-${m}-${y}`;
+    if (!dateStr) return 'N/A';
+    const [y,m,d] = dateStr.split('-');
+    return `${d}-${m}-${y}`;
 }
 
 // --- RENDER BOOKINGS ---
 function renderSection(roomName, elementId){
-  const listEl = document.getElementById(elementId);
-  const roomBookings = bookings.filter(b => b.room === roomName);
-  if(roomBookings.length===0){
-    listEl.innerHTML='<p class="text-gray-500 italic">No bookings</p>';
-    return;
-  }
-  listEl.innerHTML='';
-  roomBookings.forEach((b, index) => {
-    const el = document.createElement('div');
-    el.className='bg-white p-2 rounded border';
-    el.innerHTML=`
-      <div class="font-semibold">${formatDateDisplay(b.date)}</div>
-      <div>${b.start} - ${formatEndTime(b.start,b.duration)}</div>
-      <div class="text-gray-600 text-xs">${b.fname} ${b.lname}</div>
-      <button onclick="requestDelete(${index})" class="text-red-500 hover:text-red-700 text-xs mt-1">✕ Delete</button>
-    `;
-    listEl.appendChild(el);
-  });
+    const listEl = document.getElementById(elementId);
+    const roomBookings = bookings.filter(b => b.room === roomName);
+    
+    if(roomBookings.length === 0){
+        listEl.innerHTML = '<p class="text-gray-500 italic">No bookings</p>';
+        return;
+    }
+    
+    listEl.innerHTML = '';
+    roomBookings.forEach((b, index) => {
+        // Ensure all values exist before displaying
+        const date = formatDateDisplay(b.date) || 'N/A';
+        const startTime = b.start || 'N/A';
+        const endTime = formatEndTime(b.start, b.duration) || 'N/A';
+        const fullName = `${b.fname || 'Unknown'} ${b.lname || 'User'}`.trim();
+        
+        const el = document.createElement('div');
+        el.className = 'bg-white p-2 rounded border';
+        el.innerHTML = `
+            <div class="font-semibold">${date}</div>
+            <div>${startTime} - ${endTime}</div>
+            <div class="text-gray-600 text-xs">${fullName}</div>
+            <button onclick="requestDelete(${index})" class="text-red-500 hover:text-red-700 text-xs mt-1">✕ Delete</button>
+        `;
+        listEl.appendChild(el);
+    });
 }
 
 function updateList(){
-  renderSection("Practice Bunk 1","listBunk1");
-  renderSection("Practice Bunk 2","listBunk2");
-  renderSection("Piano Only","listPiano");
+    renderSection("Practice Bunk 1","listBunk1");
+    renderSection("Practice Bunk 2","listBunk2");
+    renderSection("Piano Only","listPiano");
 }
 
 // --- FETCH BOOKINGS FROM SHEETDB ---
 async function fetchBookings(){
-  const res = await fetch(SHEET_API);
-  const data = await res.json();
-  bookings = data.map(b=>({
-    room: b.Room,
-    date: b.Date,
-    start: b.Start,
-    duration: parseInt(b.Duration),
-    fname: b.FirstName,
-    lname: b.LastName
-  }));
-  updateList();
+    try {
+        const res = await fetch(SHEET_API);
+        if (!res.ok) throw new Error('Network response was not ok');
+        
+        const data = await res.json();
+        bookings = data.map(b => ({
+            id: b._id || b.id, // Capture the unique ID properly
+            room: b.Room || '',
+            date: b.Date || '',
+            start: b.Start || '',
+            duration: parseInt(b.Duration) || 0,
+            fname: b.FirstName || '',
+            lname: b.LastName || ''
+        }));
+        
+        updateList();
+    } catch (error) {
+        console.error('Error fetching bookings:', error);
+        alert('❌ Failed to load bookings. Please refresh the page.');
+    }
 }
 
 // --- DELETE BOOKING ---
 async function requestDelete(index){
-  const password = prompt("Enter password to delete this booking:");
-  if(password !== DELETE_PASSWORD){
-    alert("❌ Incorrect password");
-    return;
-  }
-  const booking = bookings[index];
-  const rowId = booking.id || booking._id; // SheetDB ID (ensure your SheetDB has unique IDs)
-  if(!rowId){alert("❌ Cannot delete: ID missing"); return;}
+    const password = prompt("Enter password to delete this booking:");
+    if(password !== DELETE_PASSWORD){
+        alert("❌ Incorrect password");
+        return;
+    }
+    
+    const booking = bookings[index];
+    const rowId = booking.id;
+    
+    if(!rowId){
+        alert("❌ Cannot delete: Booking ID missing");
+        return;
+    }
 
-  const res = await fetch(`${SHEET_API}/${rowId}`, {method:'DELETE'});
-  if(res.ok){ alert("✅ Booking deleted"); fetchBookings(); }
-  else alert("❌ Error deleting booking");
+    try {
+        const res = await fetch(`${SHEET_API}/${rowId}`, {method:'DELETE'});
+        if(res.ok){ 
+            alert("✅ Booking deleted"); 
+            await fetchBookings(); 
+        } else {
+            throw new Error('Delete failed');
+        }
+    } catch (error) {
+        console.error('Error deleting booking:', error);
+        alert("❌ Error deleting booking");
+    }
+}
+
+// --- IMPROVED CONFLICT CHECK FUNCTION ---
+function hasTimeConflict(newBooking, existingBookings) {
+    const newStart = timeToMinutes(newBooking.start);
+    const newEnd = newStart + newBooking.duration;
+
+    return existingBookings.some(booking => {
+        // Only check bookings for the same room and date
+        if (booking.room !== newBooking.room || booking.date !== newBooking.date) {
+            return false;
+        }
+
+        const existingStart = timeToMinutes(booking.start);
+        const existingEnd = existingStart + booking.duration;
+
+        // Check if times overlap - this is the key fix
+        // Overlap occurs if:
+        // New start is before existing end AND new end is after existing start
+        return newStart < existingEnd && newEnd > existingStart;
+    });
 }
 
 // --- BOOK ROOM ---
 async function bookRoom(){
-  // Room selection
-  const sel1=document.getElementById('roomBunk1').value;
-  const sel2=document.getElementById('roomBunk2').value;
-  const selP=document.getElementById('roomPiano').value;
-  let room=null, start=null;
-  if(sel1!=='available'){room='Practice Bunk 1'; start=sel1;}
-  else if(sel2!=='available'){room='Practice Bunk 2'; start=sel2;}
-  else if(selP!=='available'){room='Piano Only'; start=selP;}
+    // Room selection
+    const sel1 = document.getElementById('roomBunk1').value;
+    const sel2 = document.getElementById('roomBunk2').value;
+    const selP = document.getElementById('roomPiano').value;
+    let room = null, start = null;
 
-  const date=document.getElementById('date').value;
-  const duration=parseInt(document.getElementById('duration').value);
-  const fname=document.getElementById('fname').value.trim();
-  const lname=document.getElementById('lname').value.trim();
+    if(sel1 !== 'available'){
+        room = 'Practice Bunk 1'; 
+        start = sel1;
+    } else if(sel2 !== 'available'){
+        room = 'Practice Bunk 2'; 
+        start = sel2;
+    } else if(selP !== 'available'){
+        room = 'Piano Only'; 
+        start = selP;
+    }
 
-  if(!room || !date || !fname || !lname){
-    alert('⚠️ Please fill in ALL fields!');
-    return;
-  }
+    const date = document.getElementById('date').value;
+    const duration = parseInt(document.getElementById('duration').value);
+    const fname = document.getElementById('fname').value.trim();
+    const lname = document.getElementById('lname').value.trim();
 
-  // Conflict check
-  const conflict = bookings.some(b => {
-    if(b.room !== room || b.date !== date) return false;
-    const existingStart = timeToMinutes(b.start);
-    const existingEnd = existingStart + b.duration;
-    const newStart = timeToMinutes(start);
-    const newEnd = newStart + duration;
-    return !(newEnd <= existingStart || newStart >= existingEnd);
-  });
+    // Validate all fields
+    if(!room || !date || !fname || !lname){
+        alert('⚠️ Please fill in ALL fields!');
+        return;
+    }
 
-  if(conflict){alert('❌ This time slot is already booked!'); return;}
+    if(!start){
+        alert('⚠️ Please select a time slot!');
+        return;
+    }
 
-  const newBooking={
-    Room: room,
-    Date: date,
-    Start: start,
-    Duration: duration,
-    FirstName: fname,
-    LastName: lname
-  };
+    if(isNaN(duration) || duration <= 0){
+        alert('⚠️ Please select a valid duration!');
+        return;
+    }
 
-  const res = await fetch(SHEET_API, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({data:newBooking})
-  });
+    // Create new booking object
+    const newBooking = { room, date, start, duration, fname, lname };
 
-  if(res.ok){
-    alert('✅ Booking added!');
-    fetchBookings();
-  } else alert('❌ Error saving booking!');
+    // Improved conflict check
+    const conflict = hasTimeConflict(newBooking, bookings);
 
-  // Reset form
-  document.getElementById('roomBunk1').value='available';
-  document.getElementById('roomBunk2').value='available';
-  document.getElementById('roomPiano').value='available';
-  document.getElementById('fname').value='';
-  document.getElementById('lname').value='';
+    if(conflict){
+        alert('❌ This time slot overlaps with an existing booking! Please choose another time or room.'); 
+        return;
+    }
+
+    // Prepare data for SheetDB (uses exact column names from your sheet)
+    const sheetData = {
+        Room: room,
+        Date: date,
+        Start: start,
+        Duration: duration,
+        FirstName: fname,
+        LastName: lname
+    };
+
+    try {
+        const res = await fetch(SHEET_API, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({data: sheetData})
+        });
+
+        if(res.ok){
+            alert('✅ Booking added successfully!');
+            await fetchBookings();
+            
+            // Reset form
+            document.getElementById('roomBunk1').value = 'available';
+            document.getElementById('roomBunk2').value = 'available';
+            document.getElementById('roomPiano').value = 'available';
+            document.getElementById('fname').value = '';
+            document.getElementById('lname').value = '';
+        } else {
+            throw new Error('Save failed');
+        }
+    } catch (error) {
+        console.error('Error saving booking:', error);
+        alert('❌ Error saving booking! Please try again.');
+    }
 }
 
 // --- INIT ---
-document.addEventListener('DOMContentLoaded',()=>{
-  ['Bunk1','Bunk2','Piano'].forEach(id=>{
-    const sel=document.getElementById('room'+id);
-    sel.innerHTML='<option value="available">Select an Option</option>';
-    times.forEach(t=>{
-      const opt=document.createElement('option');
-      opt.value=t;
-      opt.textContent=t;
-      sel.appendChild(opt);
+document.addEventListener('DOMContentLoaded', () => {
+    ['Bunk1','Bunk2','Piano'].forEach(id => {
+        const sel = document.getElementById('room' + id);
+        sel.innerHTML = '<option value="available">-- Select time --</option>';
+        times.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            sel.appendChild(opt);
+        });
+        sel.addEventListener('change', () => singleSelect(id));
     });
-    sel.addEventListener('change',()=>singleSelect(id));
-  });
-  document.getElementById('date').value=new Date().toISOString().split('T')[0];
-  fetchBookings();
+    
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('date').value = today;
+    
+    fetchBookings();
 });
 </script>
 </body>
