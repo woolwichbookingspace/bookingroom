@@ -2,34 +2,100 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Woolwich Practice Room Booking System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Woolwich Practice Room Booking</title>
 
 <style>
-body { font-family: Arial; max-width: 900px; margin:auto; }
-h1 { text-align:center; }
-form { background:#f2f2f2; padding:20px; border-radius:10px; }
-input, select, button { padding:8px; margin:5px; }
-.roomSection { margin-top:30px; padding:15px; border:1px solid #ddd; border-radius:10px; }
-.booking { padding:5px; background:#e8f4ff; margin:5px 0; border-radius:5px; }
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  margin:0;
+  background: linear-gradient(135deg,#5f9cff,#7ee081);
+  color:#333;
+}
+
+.container {
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+}
+
+h1,h2 { text-align:center; color:white; }
+
+.card {
+  background:white;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 8px 25px rgba(0,0,0,0.15);
+  margin-bottom:20px;
+}
+
+form {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+form input, form select, button {
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  font-size:16px;
+  width:100%;
+}
+
+button {
+  grid-column: span 2;
+  background:#5f9cff;
+  color:white;
+  border:none;
+  font-weight:bold;
+  cursor:pointer;
+  transition:.2s;
+}
+button:hover { background:#4a86e8; }
+
+.roomSection {
+  margin-top:20px;
+  padding:15px;
+  border-radius:12px;
+  background:#f7fbff;
+}
+
+.booking {
+  background:#e6f3ff;
+  padding:10px;
+  border-radius:8px;
+  margin:6px 0;
+}
+
+/* 📱 Mobile layout */
+@media(max-width:600px){
+  form { grid-template-columns:1fr; }
+  button { grid-column: span 1; }
+}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<h1>Woolwich Practice Room Booking System</h1>
-<h2 style="text-align:center;">Booking availability is from 07:00 - 22:00 daily <br/>in time slots of 30, 60 & 90 minutes</h2><p style="text-align:center;">If you no longer wish to keep you booking, please message Sgt Dann or CSgt Johnson directly</p>
+<h1>Woolwich Practice Room Booking</h1>
+<h2>07:00 – 22:00 • 30/60/90 min slots</h2>
+
+<div class="card">
 <form id="bookingForm">
 <input required placeholder="First name" id="firstnameInput">
 <input required placeholder="Last name" id="lastnameInput">
 
 <select id="roomSelect">
   <option>Practice Bunk 1</option>
-  <option>Practice Bun 2</option>
+  <option>Practice Bunk 2</option>
   <option>Piano Only</option>
 </select>
 
 <input type="date" id="dateInput" required>
-
 <select id="timeSelect"></select>
 
 <select id="durationSelect">
@@ -40,24 +106,27 @@ input, select, button { padding:8px; margin:5px; }
 
 <button type="submit">Book Room</button>
 </form>
+</div>
 
 <h2>Current Bookings</h2>
 <div id="bookings"></div>
 
+</div>
+
 <script>
 const API = "https://sheetdb.io/api/v1/9uo8rb9rrusr9";
 
-// create time dropdown 07:00 → 21:30
+// clean time generator (no seconds)
 const timeDropdown = document.getElementById("timeSelect");
 for (let h = 7; h < 22; h++) {
   ["00","30"].forEach(m => {
     let t = String(h).padStart(2,'0') + ":" + m;
-    timeDropdown.innerHTML += `<option>${t}</option>`;
+    timeDropdown.innerHTML += `<option value="${t}">${t}</option>`;
   });
 }
 
-function makeDate(date, time){
-  return new Date(date + "T" + time);
+function makeDate(date,time){
+  return new Date(date + "T" + time + ":00");
 }
 
 function overlaps(start,end,existing){
@@ -69,7 +138,6 @@ function overlaps(start,end,existing){
   return false;
 }
 
-// delete expired bookings
 async function deletePastBookings(data){
   const now = new Date();
   for (let b of data){
@@ -79,25 +147,32 @@ async function deletePastBookings(data){
   }
 }
 
-// load bookings and display
+function formatTime(dateStr){
+  return new Date(dateStr).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+function formatDate(dateStr){
+  return new Date(dateStr).toLocaleDateString();
+}
+
 async function loadBookings(){
   const res = await fetch(API);
   let data = await res.json();
-
   await deletePastBookings(data);
 
   const div = document.getElementById("bookings");
   div.innerHTML = "";
 
-  ["Room 1","Room 2","Room 3"].forEach(room=>{
+  const rooms = ["Practice Bunk 1","Practice Bunk 2","Piano Only"];
+
+  rooms.forEach(room=>{
     let roomDiv = document.createElement("div");
-    roomDiv.className="roomSection";
+    roomDiv.className="card roomSection";
     roomDiv.innerHTML = `<h3>${room}</h3>`;
 
     data.filter(b=>b.room===room).forEach(b=>{
       roomDiv.innerHTML += `<div class="booking">
-        ${b.firstname} ${b.lastname}<br>
-        ${new Date(b.start).toLocaleString()} → ${new Date(b.end).toLocaleTimeString()}
+        <strong>${b.firstname} ${b.lastname}</strong><br>
+        ${formatDate(b.start)} • ${formatTime(b.start)} → ${formatTime(b.end)}
       </div>`;
     });
 
@@ -107,16 +182,15 @@ async function loadBookings(){
   return data;
 }
 
-// BOOK ROOM BUTTON
 document.getElementById("bookingForm").addEventListener("submit", async function(e){
   e.preventDefault();
 
-  const firstname = document.getElementById("firstnameInput").value.trim();
-  const lastname  = document.getElementById("lastnameInput").value.trim();
-  const room      = document.getElementById("roomSelect").value;
-  const date      = document.getElementById("dateInput").value;
-  const time      = document.getElementById("timeSelect").value;
-  const duration  = parseInt(document.getElementById("durationSelect").value);
+  const firstname = firstnameInput.value.trim();
+  const lastname  = lastnameInput.value.trim();
+  const room      = roomSelect.value;
+  const date      = dateInput.value;
+  const time      = timeSelect.value;
+  const duration  = parseInt(durationSelect.value);
 
   const start = makeDate(date,time);
   const end = new Date(start.getTime() + duration*60000);
@@ -130,7 +204,7 @@ document.getElementById("bookingForm").addEventListener("submit", async function
   const sameRoom = bookings.filter(b=>b.room===room);
 
   if(overlaps(start,end,sameRoom)){
-    alert("This room is already booked in that time slot");
+    alert("This room is already booked at that time");
     return;
   }
 
@@ -143,12 +217,11 @@ document.getElementById("bookingForm").addEventListener("submit", async function
   });
 
   alert("Booking saved!");
-  document.getElementById("bookingForm").reset();
+  bookingForm.reset();
   loadBookings();
 });
 
 loadBookings();
 </script>
-
 </body>
 </html>
