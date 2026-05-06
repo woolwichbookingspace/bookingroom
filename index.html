@@ -120,7 +120,7 @@ function formatDateDisplay(dateStr){
     return `${d}-${m}-${y}`;
 }
 
-// --- RENDER BOOKINGS
+// --- RENDER BOOKINGS — NOW DISPLAYS TIMES CORRECTLY
 function renderSection(roomName, elementId){
     const listEl = document.getElementById(elementId);
     const roomBookings = bookings.filter(b => b.room === roomName);
@@ -133,17 +133,17 @@ function renderSection(roomName, elementId){
     listEl.innerHTML = '';
     roomBookings.forEach((b, index) => {
         const date = formatDateDisplay(b.date || '');
-        const startTime = (typeof b.start === 'string' && b.start.trim()) ? b.start : 'N/A';
-        const endTime = (typeof b.end === 'string' && b.end.trim()) ? b.end : 'N/A';
-        const firstName = (typeof b.fname === 'string' && b.fname.trim()) ? b.fname.trim() : 'Unknown';
-        const lastName = (typeof b.lname === 'string' && b.lname.trim()) ? b.lname.trim() : 'User';
+        const startTime = b.startTime || 'N/A';
+        const endTime = b.endTime || 'N/A';
+        const firstName = b.firstName || 'Unknown';
+        const lastName = b.lastName || 'User';
         const fullName = `${firstName} ${lastName}`.trim();
         
         const el = document.createElement('div');
         el.className = 'bg-white p-2 rounded border';
         el.innerHTML = `
             <div class="font-semibold">${date}</div>
-            <div>${startTime} → ${endTime}</div>
+            <div><strong>${startTime}</strong> → <strong>${endTime}</strong></div>
             <div class="text-gray-600 text-xs">${fullName}</div>
             <button onclick="requestDelete(${index})" class="text-red-500 hover:text-red-700 text-xs mt-1">✕ Delete</button>
         `;
@@ -157,7 +157,7 @@ function updateList(){
     renderSection("Piano Only","listPiano");
 }
 
-// --- FETCH BOOKINGS FROM SHEETDB
+// --- FETCH BOOKINGS FROM SHEETDB — NOW READS FIELDS CORRECTLY
 async function fetchBookings(){
     try {
         const res = await fetch(SHEET_API);
@@ -168,10 +168,10 @@ async function fetchBookings(){
             id: b._id || b.id || '',
             room: b.Room || '',
             date: b.Date || '',
-            start: b.StartTime || '',
-            end: b.EndTime || '',
-            fname: b.FirstName || '',
-            lname: b.LastName || ''
+            startTime: b.StartTime || '',
+            endTime: b.EndTime || '',
+            firstName: b.FirstName || '',
+            lastName: b.LastName || ''
         }));
         
         updateList();
@@ -213,27 +213,24 @@ async function requestDelete(index){
 
 // --- CONFLICT CHECK — STRICT OVERLAP PREVENTION
 function hasTimeConflict(newBooking, existingBookings) {
-    const newStartMins = timeToMinutes(newBooking.start);
-    const newEndMins = timeToMinutes(newBooking.end);
+    const newStartMins = timeToMinutes(newBooking.startTime);
+    const newEndMins = timeToMinutes(newBooking.endTime);
 
-    // Invalid times = treat as safe
     if(newStartMins === 0 || newEndMins === 0 || newEndMins <= newStartMins) return false;
 
     return existingBookings.some(booking => {
-        // Only check same room and same date
         if (booking.room !== newBooking.room || booking.date !== newBooking.date) return false;
 
-        const existingStartMins = timeToMinutes(booking.start);
-        const existingEndMins = timeToMinutes(booking.end);
+        const existingStartMins = timeToMinutes(booking.startTime);
+        const existingEndMins = timeToMinutes(booking.endTime);
 
         if(existingStartMins === 0 || existingEndMins === 0) return false;
 
-        // Overlap logic: if new start is before existing end AND new end is after existing start
         return newStartMins < existingEndMins && newEndMins > existingStartMins;
     });
 }
 
-// --- BOOK ROOM
+// --- BOOK ROOM — NOW SAVES FIELDS CORRECTLY TO SHEET
 async function bookRoom(){
     // Room selection
     const sel1 = document.getElementById('roomBunk1').value;
@@ -256,7 +253,7 @@ async function bookRoom(){
         alert('⚠️ Please fill in ALL fields!');
         return;
     }
-    if(startTime === "" || endTime === ""){
+    if(!startTime || !endTime){
         alert('⚠️ Please select both a start and end time!');
         return;
     }
@@ -269,7 +266,7 @@ async function bookRoom(){
         return;
     }
 
-    const newBooking = { room, date, start: startTime, end: endTime };
+    const newBooking = { room, date, startTime, endTime };
     const conflict = hasTimeConflict(newBooking, bookings);
 
     if(conflict){
@@ -277,6 +274,7 @@ async function bookRoom(){
         return;
     }
 
+    // THIS IS EXACTLY WHAT GETS WRITTEN TO GOOGLE SHEETS — MATCH HEADERS EXACTLY
     const sheetData = {
         Room: room,
         Date: date,
