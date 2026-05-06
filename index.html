@@ -110,21 +110,6 @@ function timeToMinutes(timeStr){
     return h * 60 + m;
 }
 
-function formatEndTime(startTime, duration){
-    // Ensure we have valid inputs
-    if (!startTime || typeof startTime !== 'string' || !startTime.includes(':')) return 'N/A';
-    
-    // Convert duration to a safe number
-    const durationNum = parseInt(duration, 10) || 0;
-    if (durationNum <= 0) return 'N/A';
-
-    const totalMinutes = timeToMinutes(startTime) + durationNum;
-    const hours = Math.floor(totalMinutes / 60);
-    const mins = totalMinutes % 60;
-    
-    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
-}
-
 function formatDateDisplay(dateStr){
     if (!dateStr || typeof dateStr !== 'string') return 'N/A';
     const parts = dateStr.split('-');
@@ -148,7 +133,7 @@ function renderSection(roomName, elementId){
         // Safe data extraction
         const date = formatDateDisplay(b.date);
         const startTime = (b.start && typeof b.start === 'string') ? b.start : 'N/A';
-        const endTime = formatEndTime(b.start, b.duration);
+        const duration = (b.duration && !isNaN(b.duration)) ? `${b.duration} mins` : 'N/A';
         const firstName = (b.fname && typeof b.fname === 'string') ? b.fname.trim() : 'Unknown';
         const lastName = (b.lname && typeof b.lname === 'string') ? b.lname.trim() : 'User';
         const fullName = `${firstName} ${lastName}`.trim();
@@ -157,7 +142,7 @@ function renderSection(roomName, elementId){
         el.className = 'bg-white p-2 rounded border';
         el.innerHTML = `
             <div class="font-semibold">${date}</div>
-            <div>${startTime} – ${endTime}</div>
+            <div>${startTime} (${duration})</div>
             <div class="text-gray-600 text-xs">${fullName}</div>
             <button onclick="requestDelete(${index})" class="text-red-500 hover:text-red-700 text-xs mt-1">✕ Delete</button>
         `;
